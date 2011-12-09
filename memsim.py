@@ -42,18 +42,22 @@ def main():
             return
         elif user_input == 'c':
             letter=next(letters)
+            startletter = letter
             while letter in main_mem:
                 letter=next(letters)
+                if letter == startletter:
+                    print("PROCESS-LIMIT, EXITING")
+                    sys.exit()
             toplace=randint(10,100)
             worked=switch(main_mem,letter,toplace)
             if not worked:
                 defrag(main_mem)
                 worked=switch(main_mem,letter,toplace)
                 if not worked:
-                    print("out of memory")
+                    print("OUT-OF-MEMORY, EXITING")
                     sys.exit()
         
-        display_memory(main_mem)   
+        display_memory(main_mem)
 
 def switch(main_mem,letter,toplace):
     return {
