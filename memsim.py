@@ -13,8 +13,6 @@ def display_memory(main_mem):
     for i in range(30):
         print(''.join(map(str, main_mem[i*80:i*80+80])))
 
-
-
 #main function
 def main():
     
@@ -23,8 +21,9 @@ def main():
     letters=itertools.cycle(string.ascii_uppercase+string.ascii_lowercase)
     
     #checks for proper usage
-    if len(sys.argv) != 4 or (sys.argv[1] != "first" and sys.argv[1] != "best" and sys.argv[1] != "next" and sys.argv[1] != "worst"):
+    if len(sys.argv) != 4 or (sys.argv[1] != "noncontiguous" and sys.argv[1] != "first" and sys.argv[1] != "best" and sys.argv[1] != "next" and sys.argv[1] != "worst") or sys.argv[2] not in range(101) or sys.argv[3] not in range(101):
         print("USAGE: memsim.py { noncontiguous | first | best | next | worst } <process-termination-probability> <new-process-probability>")
+        sys.exit()
     
     #initializes memory
     main_mem = list(itertools.repeat("#",80))
@@ -38,7 +37,6 @@ def main():
     
     display_memory(main_mem)
     
-    
     #main loop
     while(True):
         user_input = input("Type c and hit ENTER to continue. ")
@@ -48,8 +46,10 @@ def main():
             for letter in set(main_mem):
                 if letter=="." or letter=="#":
                     continue
+                #removal of letters
                 if(randint(1,100)<=int(sys.argv[2])):
                     remove_proc(main_mem,letter)
+            #adding new letters/processes
             if(randint(1,100)<=int(sys.argv[3])):
                 letter=next(letters)
                 
@@ -62,6 +62,7 @@ def main():
                 
                 toplace=randint(10,100)
                 worked=switch(main_mem,letter,toplace)
+                #after failure, try defragmenting, then stop if reached failure again
                 if not worked:
                     main_mem=defrag(main_mem)
                     worked=switch(main_mem,letter,toplace)
@@ -70,6 +71,7 @@ def main():
                         sys.exit()
         display_memory(main_mem)
 
+#switching between algorithms for placement based on command line arguments
 def switch(main_mem,letter,toplace):
     return {
         "noncontiguous": lambda x:noncontiguous_place(main_mem,letter,toplace),
@@ -103,6 +105,7 @@ def best_place(main_mem,letter,toplace):
     pattern = "\.{%d,}"%toplace
     memory=''.join(main_mem)
     allpossible=re.finditer(pattern,memory)
+    #keep track of smallest space open
     try:
         smallest=next(allpossible)
         for result in allpossible:
@@ -118,6 +121,7 @@ def next_place(main_mem,letter,toplace):
     global lastplaced
     pattern = "\.{%d}"%toplace
     memory=''.join(main_mem)
+    #look for next open space following the last placement
     result=re.search(pattern,memory[lastplaced:]+memory[:lastplaced])
     if(result):
         for i in range(result.start(),result.end()):
@@ -130,6 +134,7 @@ def worst_place(main_mem,letter,toplace):
     pattern = "\.{%d,}"%toplace
     memory=''.join(main_mem)
     allpossible=re.finditer(pattern,memory)
+    #keep track of the largest space open
     try:
         largest=next(allpossible)
         for result in allpossible:
@@ -146,21 +151,20 @@ def worst_place(main_mem,letter,toplace):
 def defrag(main_mem):
     print("OUT-OF-MEMORY\nPERFORMING DEFRAGMENTATION")
     
-    
     nonsys=main_mem[80:]
+    #the defragmentation:
     nonsys.sort()
     global lastplaced
     lastplaced=0
     defragged=list(itertools.repeat("#",80))+nonsys
     display_memory(defragged)
+    
     print("DEFRAGMENTATION COMPLETED")
-    
-    
     percent="%0.2f"%(defragged.count('.')/24)
     print("Relocated ",len(set(main_mem))-2," processes to create free memory block of ",defragged.count('.')," units (",percent,"% of total memory)")
-    
     return defragged
 
+#emptying out space
 def remove_proc(main_mem,letter):
     for i in range(len(main_mem)):
         if main_mem[i]==letter:

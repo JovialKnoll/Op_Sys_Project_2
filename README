@@ -1,11 +1,4 @@
-http://docs.python.org/library/re.html#re.finditer
-
-http://docs.python.org/library/re.html#re.MatchObject
-
-here ya go
-
-
+Brett Kaplan and Jeff Johnston
 
 how to launch:
-python3.1 memsim.py {} {} {}
-
+python3.1 memsim.py { noncontiguous | first | best | next | worst } <process-termination-probability> <new-process-probability>
