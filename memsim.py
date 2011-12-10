@@ -145,7 +145,6 @@ def worst_place(main_mem,letter,toplace):
         return 1
     except:
         return 0
-    
 
 #defragments, but keeps the OS where it belongs
 def defrag(main_mem):
